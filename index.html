@@ -48,6 +48,7 @@
                 </div>
 
                 <div class="info" id="message">컴퓨터가 시작합니다.</div>
+                <div class="small" style="margin-top:8px;color:var(--muted)">한 글자 단어는 사용할 수 없습니다. 2글자 이상 입력하세요.</div>
                 <div class="small" style="margin-top:8px;color:var(--muted)">로컬 서버로 실행하면 같은 폴더의 <code>wordslistUnique.txt</code>를 자동으로 불러옵니다.</div>
 
                                 <div class="meta">
@@ -178,6 +179,7 @@
                 submitBtn.addEventListener('click', ()=>{
                     const val = inputEl.value.trim();
                     if(!val){ msgEl.textContent='단어를 입력하세요.'; return; }
+                    if(val.length < 2){ msgEl.textContent='한 글자 단어는 사용할 수 없습니다. 2글자 이상 입력하세요.'; return; }
                     if(used.has(val)){ msgEl.textContent='이미 사용된 단어입니다.'; return; }
                     if(!dictSet.has(val)) { msgEl.textContent='사전에 없는 단어입니다. 목록에 있는 단어만 사용하세요.'; return; }
                     // 첫 글자 검사
