@@ -48,6 +48,7 @@
                 </div>
 
                 <div class="info" id="message">컴퓨터가 시작합니다.</div>
+                <div class="small" style="margin-top:8px;color:var(--muted)">로컬 서버로 실행하면 같은 폴더의 <code>wordslistUnique.txt</code>를 자동으로 불러옵니다.</div>
 
                                 <div class="meta">
                     <div class="box">플레이어 승: <span id="playerWins">0</span></div>
@@ -75,11 +76,13 @@
                 ];
 
                 const dictSet = new Set(DICT);
+                const localDictFile = 'wordslistUnique.txt';
                 let used = new Set();
                 let currentWord = '';
                 let round = 0;
                 let playerWins = 0;
                 let computerWins = 0;
+                let localAdded = 0;
 
                 const el = id => document.getElementById(id);
                 const currentEl = el('currentWord');
@@ -97,6 +100,18 @@
                 const importBtn = el('importBtn');
                 const urlInput = el('urlInput');
                 const fetchBtn = el('fetchBtn');
+
+                async function loadLocalDictionary(){
+                    try{
+                        const resp = await fetch(localDictFile);
+                        if(!resp.ok) throw new Error(resp.status + ' ' + resp.statusText);
+                        const text = await resp.text();
+                        const words = text.split(/\r?\n|[,，\s]+/).map(s=>s.trim()).filter(Boolean);
+                        words.forEach(w=>{ if(!dictSet.has(w)){ DICT.push(w); dictSet.add(w); localAdded++; }});
+                    }catch(err){
+                        console.warn('Local dictionary load failed:', err);
+                    }
+                }
 
                 function pickRandomStart(){
                     const arr = Array.from(dictSet);
@@ -156,7 +171,7 @@
                     currentWord = pickRandomStart();
                     used.add(currentWord);
                     round = 1;
-                    msgEl.textContent = '컴퓨터가 시작했습니다: ' + currentWord;
+                    msgEl.textContent = (localAdded ? `wordslistUnique.txt에서 ${localAdded}개 단어를 불러왔습니다. ` : '') + '컴퓨터가 시작했습니다: ' + currentWord;
                     updateUI();
                 }
 
@@ -228,7 +243,11 @@
                 inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitBtn.click(); });
 
                 // 시작
-                startGame();
+                async function init(){
+                    await loadLocalDictionary();
+                    startGame();
+                }
+                init();
             })();
         </script>
     </body>
